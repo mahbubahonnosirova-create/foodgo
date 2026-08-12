@@ -5,265 +5,318 @@ import { useCart } from "../context/CartContext"
 import { createOrder } from "../api/api"
 
 export default function Checkout() {
+  const navigate = useNavigate()
 
-    const navigate = useNavigate()
+  const {
+    cart,
+    clearCart,
+  } = useCart()
 
-    const {
-        cart,
-        totalPrice,
-        clearCart
-    } = useCart()
+  const [form, setForm] = useState({
+    customerName: "",
+    phone: "",
+    address: "",
+    comment: "",
+  })
 
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
 
-    const [form, setForm] = useState({
-        customerName: "",
-        phone: "",
-        address: "",
-        comment: ""
-    })
+  // Считаем общую стоимость прямо из корзины
+  const totalPrice = cart.reduce(
+    (total, item) => {
+      return total + item.price * item.quantity
+    },
+    0
+  )
 
+  // Общее количество товаров
+  const totalItems = cart.reduce(
+    (total, item) => {
+      return total + item.quantity
+    },
+    0
+  )
 
-    const [loading, setLoading] = useState(false)
+  function handleChange(event) {
+    const { name, value } = event.target
 
-    const [error, setError] = useState("")
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
 
+  async function handleSubmit(event) {
+    event.preventDefault()
 
-    function handleChange(event) {
-
-        const { name, value } = event.target
-
-        setForm({
-            ...form,
-            [name]: value
-        })
-
-    }
-
-
-    async function handleSubmit(event) {
-
-        event.preventDefault()
-
-        setError("")
-
-
-        if (cart.length === 0) {
-            setError("Корзина пуста")
-            return
-        }
-
-
-        try {
-
-            setLoading(true)
-
-
-            const items = cart.map(item => ({
-                productId: item._id,
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-                image: item.image
-            }))
-
-
-            const order = await createOrder({
-                ...form,
-                items,
-                totalPrice
-            })
-
-
-            clearCart()
-
-
-            navigate(
-                `/order-success?id=${order._id}`
-            )
-
-        } catch (error) {
-
-            console.error(error)
-
-            setError(
-                error.message || "Не удалось оформить заказ"
-            )
-
-        } finally {
-
-            setLoading(false)
-
-        }
-
-    }
-
+    setError("")
 
     if (cart.length === 0) {
-
-        return (
-            <main className="flex min-h-screen items-center justify-center bg-[#fafafa] px-5">
-
-                <div className="text-center">
-
-                    <div className="text-6xl">
-                        🛒
-                    </div>
-
-                    <h1 className="mt-5 text-2xl font-black">
-                        Корзина пуста
-                    </h1>
-
-                    <Link
-                        to="/menu"
-                        className="mt-6 inline-block rounded-full bg-[#e85d3f] px-6 py-3 font-bold text-white"
-                    >
-                        Перейти в меню
-                    </Link>
-
-                </div>
-
-            </main>
-        )
-
+      setError("Корзина пуста")
+      return
     }
 
+    try {
+      setLoading(true)
 
+      const items = cart.map((item) => ({
+        productId: item._id || item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image,
+      }))
+
+      const order = await createOrder({
+        ...form,
+        items,
+        totalPrice,
+      })
+
+      clearCart()
+
+      navigate(`/order-success?id=${order._id}`)
+    } catch (error) {
+      console.error(error)
+
+      setError(
+        error?.message || "Не удалось оформить заказ"
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // EMPTY CART
+
+  if (cart.length === 0) {
     return (
-        <main className="min-h-screen bg-[#fafafa] px-5 pb-32 pt-8">
+      <main className="min-h-screen bg-white px-5 pb-10 pt-8">
 
-            <div className="mx-auto max-w-2xl">
+        <div className="mx-auto flex min-h-[80vh] max-w-md flex-col items-center justify-center text-center">
 
-                <Link
-                    to="/cart"
-                    className="text-sm font-bold text-gray-500"
-                >
-                    ← Назад в корзину
-                </Link>
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#f5eeee] text-3xl">
+            🛒
+          </div>
 
+          <h1 className="mt-6 text-2xl font-bold text-[#3d3434]">
+            Корзина пуста
+          </h1>
 
-                <h1 className="mt-6 text-3xl font-black">
-                    Оформление заказа
-                </h1>
+          <p className="mt-2 text-sm text-[#999292]">
+            Добавь что-нибудь вкусное
+          </p>
 
+          <Link
+            to="/menu"
+            className="mt-7 flex h-12 items-center justify-center rounded-2xl bg-[#3d3030] px-8 text-sm font-bold text-white transition hover:bg-[#2f2525]"
+          >
+            Перейти в меню
+          </Link>
 
-                <p className="mt-2 text-sm text-gray-400">
-                    Заполни данные для доставки
-                </p>
+        </div>
 
+      </main>
+    )
+  }
 
-                <form
-                    onSubmit={handleSubmit}
-                    className="mt-8 space-y-5"
-                >
+  return (
+    <main className="min-h-screen bg-white px-5 pb-10 pt-8">
 
-                    <div className="rounded-3xl bg-white p-5 shadow-sm">
+      <div className="mx-auto max-w-md">
 
-                        <h2 className="text-lg font-black">
-                            Данные получателя
-                        </h2>
+        {/* BACK */}
 
-
-                        <div className="mt-5 space-y-4">
-
-                            <input
-                                type="text"
-                                name="customerName"
-                                value={form.customerName}
-                                onChange={handleChange}
-                                placeholder="Имя"
-                                required
-                                className="w-full rounded-2xl bg-gray-50 px-4 py-4 outline-none focus:ring-2 focus:ring-[#e85d3f]"
-                            />
+        <Link
+          to="/cart"
+          className="inline-flex text-sm font-bold text-[#999292] transition hover:text-[#3d3434]"
+        >
+          ← Назад в корзину
+        </Link>
 
 
-                            <input
-                                type="tel"
-                                name="phone"
-                                value={form.phone}
-                                onChange={handleChange}
-                                placeholder="Телефон"
-                                required
-                                className="w-full rounded-2xl bg-gray-50 px-4 py-4 outline-none focus:ring-2 focus:ring-[#e85d3f]"
-                            />
+        {/* HEADER */}
+
+        <div className="mt-6">
+
+          <h1 className="text-2xl font-black text-[#3d3434]">
+            Оформление заказа
+          </h1>
+
+          <p className="mt-2 text-sm text-[#999292]">
+            Заполни данные для доставки
+          </p>
+
+        </div>
 
 
-                            <input
-                                type="text"
-                                name="address"
-                                value={form.address}
-                                onChange={handleChange}
-                                placeholder="Адрес доставки"
-                                required
-                                className="w-full rounded-2xl bg-gray-50 px-4 py-4 outline-none focus:ring-2 focus:ring-[#e85d3f]"
-                            />
+        {/* FORM */}
+
+        <form
+          onSubmit={handleSubmit}
+          className="mt-7 space-y-5"
+        >
+
+          {/* CUSTOMER DATA */}
+
+          <section className="rounded-3xl bg-[#f7f6f6] p-5">
+
+            <h2 className="text-base font-black text-[#3d3434]">
+              Данные получателя
+            </h2>
+
+            <div className="mt-5 space-y-4">
+
+              {/* NAME */}
+
+              <div>
+
+                <label className="mb-2 block text-xs font-bold text-[#777070]">
+                  Имя
+                </label>
+
+                <input
+                  type="text"
+                  name="customerName"
+                  value={form.customerName}
+                  onChange={handleChange}
+                  placeholder="Введите имя"
+                  required
+                  className="w-full rounded-2xl border border-transparent bg-white px-4 py-3.5 text-sm text-[#3d3434] outline-none transition placeholder:text-[#aaa3a3] focus:border-[#3d3030]"
+                />
+
+              </div>
 
 
-                            <textarea
-                                name="comment"
-                                value={form.comment}
-                                onChange={handleChange}
-                                placeholder="Комментарий к заказу"
-                                rows="4"
-                                className="w-full resize-none rounded-2xl bg-gray-50 px-4 py-4 outline-none focus:ring-2 focus:ring-[#e85d3f]"
-                            />
+              {/* PHONE */}
 
-                        </div>
+              <div>
 
-                    </div>
+                <label className="mb-2 block text-xs font-bold text-[#777070]">
+                  Телефон
+                </label>
 
+                <input
+                  type="tel"
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
+                  placeholder="+998 90 123 45 67"
+                  required
+                  className="w-full rounded-2xl border border-transparent bg-white px-4 py-3.5 text-sm text-[#3d3434] outline-none transition placeholder:text-[#aaa3a3] focus:border-[#3d3030]"
+                />
 
-                    {error && (
-                        <div className="rounded-2xl bg-red-50 p-4 text-sm text-red-500">
-                            {error}
-                        </div>
-                    )}
-
-
-                    <div className="rounded-3xl bg-white p-5 shadow-sm">
-
-                        <div className="flex justify-between text-gray-500">
-                            <span>Товаров</span>
-
-                            <span>
-                                {cart.reduce(
-                                    (sum, item) =>
-                                        sum + item.quantity,
-                                    0
-                                )}
-                            </span>
-                        </div>
+              </div>
 
 
-                        <div className="mt-4 flex justify-between text-xl font-black">
+              {/* ADDRESS */}
 
-                            <span>
-                                Итого
-                            </span>
+              <div>
 
-                            <span>
-                                {totalPrice.toLocaleString()} сум
-                            </span>
+                <label className="mb-2 block text-xs font-bold text-[#777070]">
+                  Адрес доставки
+                </label>
 
-                        </div>
+                <input
+                  type="text"
+                  name="address"
+                  value={form.address}
+                  onChange={handleChange}
+                  placeholder="Введите адрес"
+                  required
+                  className="w-full rounded-2xl border border-transparent bg-white px-4 py-3.5 text-sm text-[#3d3434] outline-none transition placeholder:text-[#aaa3a3] focus:border-[#3d3030]"
+                />
+
+              </div>
 
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="mt-6 w-full rounded-full bg-[#e85d3f] py-4 font-bold text-white transition hover:bg-[#d94f34] disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            {loading
-                                ? "Оформляем..."
-                                : "Оформить заказ"
-                            }
-                        </button>
+              {/* COMMENT */}
 
-                    </div>
+              <div>
 
-                </form>
+                <label className="mb-2 block text-xs font-bold text-[#777070]">
+                  Комментарий
+                </label>
+
+                <textarea
+                  name="comment"
+                  value={form.comment}
+                  onChange={handleChange}
+                  placeholder="Комментарий к заказу"
+                  rows="4"
+                  className="w-full resize-none rounded-2xl border border-transparent bg-white px-4 py-3.5 text-sm text-[#3d3434] outline-none transition placeholder:text-[#aaa3a3] focus:border-[#3d3030]"
+                />
+
+              </div>
 
             </div>
 
-        </main>
-    )
+          </section>
+
+
+          {/* ERROR */}
+
+          {error && (
+            <div className="rounded-2xl bg-red-50 p-4 text-sm font-medium text-red-500">
+              {error}
+            </div>
+          )}
+
+
+          {/* ORDER TOTAL */}
+
+          <section className="rounded-3xl bg-[#f7f6f6] p-5">
+
+            <div className="flex items-center justify-between">
+
+              <span className="text-sm text-[#8f8989]">
+                Товаров
+              </span>
+
+              <span className="text-sm font-bold text-[#3d3434]">
+                {totalItems}
+              </span>
+
+            </div>
+
+
+            <div className="mt-4 flex items-center justify-between border-t border-[#e9e7e7] pt-4">
+
+              <span className="text-base font-bold text-[#3d3434]">
+                Итого
+              </span>
+
+              <span className="text-xl font-black text-[#3d3434]">
+                {totalPrice.toLocaleString("ru-RU")} сум
+              </span>
+
+            </div>
+
+
+            {/* SUBMIT */}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-6 flex h-14 w-full items-center justify-center rounded-2xl bg-[#3d3030] text-sm font-bold text-white transition hover:bg-[#2f2525] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loading
+                ? "Оформляем..."
+                : "Оформить заказ"}
+            </button>
+
+          </section>
+
+        </form>
+
+
+        {/* BOTTOM SPACE FOR NAVBAR */}
+
+        <div className="h-24" />
+
+      </div>
+
+    </main>
+  )
 }

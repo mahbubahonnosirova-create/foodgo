@@ -1,82 +1,164 @@
 import { Link } from "react-router-dom"
-import ProductCard from "../components/ProductCard"
 import { useFavorites } from "../context/FavoritesContext"
 
 export default function Favorites() {
-  const { favorites } = useFavorites()
+  const {
+    favorites,
+    toggleFavorite,
+  } = useFavorites()
 
   return (
-    <main className="min-h-screen bg-[#fafafa] px-5 pb-32 pt-8">
+    <main className="min-h-screen bg-[#fafafa] pb-32">
 
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto w-full max-w-7xl px-5 sm:px-6 lg:px-8">
 
         {/* HEADER */}
 
-        <div className="mb-8">
+        <section className="pt-8">
 
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#e85d3f]">
-            Твои любимые
+          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#f7253d]">
+            FOODGO
           </p>
 
-          <h1 className="mt-1 text-3xl font-black">
-            Избранное
-          </h1>
+          <div className="mt-2 flex items-end justify-between gap-4">
 
-          <p className="mt-2 text-sm text-gray-400">
-            {favorites.length === 0
-              ? "Здесь пока ничего нет"
-              : `${favorites.length} ${favorites.length === 1 ? "товар" : "товара"}`
-            }
-          </p>
+            <div>
 
-        </div>
+              <h1 className="text-[32px] font-black leading-[1.05] tracking-[-1px] text-[#242020]">
+                Избранное
+              </h1>
+
+              <p className="mt-2 text-[14px] text-[#999]">
+                Твои любимые блюда
+              </p>
+
+            </div>
+
+            <div className="shrink-0 rounded-full bg-[#fff0f0] px-4 py-2 text-[12px] font-bold text-[#f7253d]">
+              {favorites.length}{" "}
+              {favorites.length === 1
+                ? "блюдо"
+                : "блюд"}
+            </div>
+
+          </div>
+
+        </section>
 
 
         {/* EMPTY */}
 
-        {favorites.length === 0 && (
+        {favorites.length === 0 ? (
 
-          <div className="flex min-h-[400px] flex-col items-center justify-center rounded-[30px] bg-white px-6 text-center shadow-sm">
+          <div className="mt-10 rounded-[28px] bg-white px-6 py-16 text-center shadow-[0_5px_25px_rgba(0,0,0,0.05)]">
 
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[#fff1ec] text-5xl">
+            <div className="text-5xl text-[#f7253d]">
               ♡
             </div>
 
-            <h2 className="mt-6 text-2xl font-black">
-              Пока пусто
+            <h2 className="mt-4 text-xl font-black text-[#242020]">
+              Пока ничего нет
             </h2>
 
-            <p className="mt-2 max-w-sm text-sm leading-6 text-gray-400">
-              Нажимай на сердечко возле понравившихся
-              блюд, чтобы сохранить их здесь.
+            <p className="mt-2 text-sm text-[#999]">
+              Добавляй любимые блюда в избранное
             </p>
 
             <Link
-              to="/menu"
-              className="mt-7 rounded-full bg-[#e85d3f] px-7 py-3.5 text-sm font-bold text-white transition hover:bg-[#d94f34]"
+              to="/"
+              className="mt-6 inline-flex rounded-[16px] bg-[#f7253d] px-6 py-3 text-sm font-bold text-white shadow-[0_6px_18px_rgba(247,37,61,0.2)]"
             >
-              Перейти в меню
+              Перейти к блюдам
             </Link>
 
           </div>
 
-        )}
+        ) : (
+
+          /* FAVORITES */
+
+          <section className="mt-8">
+
+            <div className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+
+              {favorites.map((product) => {
+
+                const productId =
+                  product._id || product.id
+
+                return (
+
+                  <article
+                    key={productId}
+                    className="group overflow-hidden rounded-[24px] bg-white shadow-[0_5px_20px_rgba(0,0,0,0.055)] transition duration-300 hover:-translate-y-1"
+                  >
+
+                    {/* IMAGE */}
+
+                    <div className="relative h-[180px] w-full overflow-hidden bg-[#eeeeee] sm:h-[210px]">
+
+                      <Link
+                        to={`/product/${productId}`}
+                        className="block h-full w-full"
+                      >
+
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                        />
+
+                      </Link>
 
 
-        {/* PRODUCTS */}
+                      {/* HEART */}
 
-        {favorites.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          toggleFavorite(product)
+                        }
+                        className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white text-[21px] text-[#f7253d] shadow-[0_4px_15px_rgba(0,0,0,0.12)] transition active:scale-90"
+                      >
+                        ♥
+                      </button>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    </div>
 
-            {favorites.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-              />
-            ))}
 
-          </div>
+                    {/* INFO */}
+
+                    <div className="px-4 pb-4 pt-3">
+
+                      <Link
+                        to={`/product/${productId}`}
+                      >
+
+                        <h3 className="truncate text-[15px] font-bold text-[#302b2b]">
+                          {product.name}
+                        </h3>
+
+                        <p className="mt-1 line-clamp-2 text-[12px] leading-5 text-[#999]">
+                          {product.description}
+                        </p>
+
+                      </Link>
+
+
+                      <p className="mt-3 text-[15px] font-black text-[#222]">
+                        {product.price?.toLocaleString("ru-RU")} сум
+                      </p>
+
+                    </div>
+
+                  </article>
+
+                )
+              })}
+
+            </div>
+
+          </section>
 
         )}
 

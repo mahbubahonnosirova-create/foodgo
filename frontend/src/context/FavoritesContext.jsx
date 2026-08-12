@@ -1,30 +1,70 @@
-import { createContext, useContext, useState } from "react"
+import { createContext, useContext, useEffect, useState } from "react"
 
-const FavoritesContext = createContext()
+const FavoritesContext = createContext(null)
+
+const getProductId = (product) => {
+  return product?._id || product?.id
+}
 
 export function FavoritesProvider({ children }) {
-  const [favorites, setFavorites] = useState([])
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      const saved = localStorage.getItem("foodgo-favorites")
 
-  // Добавить / убрать из избранного
+      if (!saved) {
+        return []
+      }
+
+      const parsed = JSON.parse(saved)
+
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  })
+
+  useEffect(() => {
+    localStorage.setItem(
+      "foodgo-favorites",
+      JSON.stringify(favorites)
+    )
+  }, [favorites])
+
   const toggleFavorite = (product) => {
-    setFavorites((currentFavorites) => {
-      const exists = currentFavorites.some(
-        (item) => item.id === product.id
+    const productId = getProductId(product)
+
+    if (!productId) {
+      return
+    }
+
+    setFavorites((current) => {
+      const exists = current.some(
+        (item) => getProductId(item) === productId
       )
 
       if (exists) {
-        return currentFavorites.filter(
-          (item) => item.id !== product.id
+        return current.filter(
+          (item) => getProductId(item) !== productId
         )
       }
 
-      return [...currentFavorites, product]
+      return [...current, product]
     })
   }
 
-  // Проверить, есть ли товар в избранном
-  const isFavorite = (id) => {
-    return favorites.some((item) => item.id === id)
+  const isFavorite = (product) => {
+    const productId =
+      typeof product === "object"
+        ? getProductId(product)
+        : product
+
+    return favorites.some(
+      (item) => getProductId(item) === productId
+    )
+  }
+
+  const clearFavorites = () => {
+    setFavorites([])
   }
 
   return (
@@ -33,6 +73,7 @@ export function FavoritesProvider({ children }) {
         favorites,
         toggleFavorite,
         isFavorite,
+        clearFavorites,
       }}
     >
       {children}
@@ -41,5 +82,13 @@ export function FavoritesProvider({ children }) {
 }
 
 export function useFavorites() {
-  return useContext(FavoritesContext)
+  const context = useContext(FavoritesContext)
+
+  if (!context) {
+    throw new Error(
+      "useFavorites must be used inside FavoritesProvider"
+    )
+  }
+
+  return context
 }

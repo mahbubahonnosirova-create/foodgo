@@ -1,5 +1,9 @@
 import { useEffect } from "react"
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+} from "react-router-dom"
 
 import Header from "./components/Header"
 import BottomNav from "./components/BottomNav"
@@ -15,7 +19,6 @@ import Favorites from "./pages/Favorites"
 import Search from "./pages/Search"
 import Profile from "./pages/Profile"
 import Settings from "./pages/Settings"
-
 import EditProfile from "./pages/EditProfile"
 import Address from "./pages/Address"
 import Help from "./pages/Help"
@@ -23,108 +26,102 @@ import About from "./pages/About"
 
 export default function App() {
 
-    useEffect(() => {
+  useEffect(() => {
 
-        const tg = window.Telegram?.WebApp
+    const tg = window.Telegram?.WebApp
 
-        if (!tg) return
+    if (!tg) return
 
-        tg.ready()
-        tg.expand()
+    tg.ready()
+    tg.expand()
 
-    }, [])
+  }, [])
 
 
-    return (
-        <BrowserRouter>
+  return (
+    <BrowserRouter>
 
-            <div className="min-h-screen bg-[#fafafa]">
+      <div className="min-h-screen bg-[#f7f7f5]">
 
-                <Header />
+        <Header />
 
-                <Routes>
+        <Routes>
 
-                    <Route
-                        path="/"
-                        element={<Home />}
-                    />
+          <Route path="/" element={<Home />} />
 
-                    <Route
-                        path="/menu"
-                        element={<Menu />}
-                    />
+          <Route path="/menu" element={<Menu />} />
 
-                    <Route
-                        path="/product/:id"
-                        element={<Product />}
-                    />
+          <Route
+            path="/product/:id"
+            element={<Product />}
+          />
 
-                    <Route
-                        path="/cart"
-                        element={<Cart />}
-                    />
+          <Route
+            path="/cart"
+            element={<Cart />}
+          />
 
-                    <Route
-                        path="/checkout"
-                        element={<Checkout />}
-                    />
+          <Route
+            path="/checkout"
+            element={<Checkout />}
+          />
 
-                    <Route
-                        path="/order-success"
-                        element={<OrderSuccess />}
-                    />
+          <Route
+            path="/order-success"
+            element={<OrderSuccess />}
+          />
 
-                    <Route
-                        path="/orders"
-                        element={<Orders />}
-                    />
+          <Route
+            path="/orders"
+            element={<Orders />}
+          />
 
-                    <Route
-                        path="/favorites"
-                        element={<Favorites />}
-                    />
+          <Route
+            path="/favorites"
+            element={<Favorites />}
+          />
 
-                    <Route
-                        path="/search"
-                        element={<Search />}
-                    />
+          <Route
+            path="/search"
+            element={<Search />}
+          />
 
-                    <Route
-                        path="/profile"
-                        element={<Profile />}
-                    />
+          <Route
+            path="/profile"
+            element={<Profile />}
+          />
 
-                    <Route
-                        path="/settings"
-                        element={<Settings />}
-                    />
+          <Route
+            path="/settings"
+            element={<Settings />}
+          />
 
-                    <Route
-                        path="/profile/edit"
-                        element={<EditProfile />}
-                    />
+          <Route
+            path="/profile/edit"
+            element={<EditProfile />}
+          />
 
-                    <Route
-                        path="/profile/address"
-                        element={<Address />}
-                    />
+          <Route
+            path="/profile/address"
+            element={<Address />}
+          />
 
-                    <Route
-                        path="/help"
-                        element={<Help />}
-                    />
+          <Route
+            path="/help"
+            element={<Help />}
+          />
 
-                    <Route
-                        path="/about"
-                        element={<About />}
-                    />
+          <Route
+            path="/about"
+            element={<About />}
+          />
 
-                </Routes>
+        </Routes>
 
-                <BottomNav />
+        <BottomNav />
 
-            </div>
+      </div>
 
-        </BrowserRouter>
-    )
+    </BrowserRouter>
+  )
 }

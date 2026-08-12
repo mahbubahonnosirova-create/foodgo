@@ -2,6 +2,7 @@ import express from "express"
 import mongoose from "mongoose"
 import cors from "cors"
 import dotenv from "dotenv"
+
 import productRoutes from "./routes/products.js"
 import orderRoutes from "./routes/orders.js"
 
@@ -11,6 +12,15 @@ const app = express()
 
 app.use(cors())
 app.use(express.json())
+
+// Проверка сервера
+app.get("/", (req, res) => {
+    res.json({
+        message: "FoodGo API is working"
+    })
+})
+
+// API
 app.use("/api/products", productRoutes)
 app.use("/api/orders", orderRoutes)
 
@@ -24,13 +34,17 @@ async function startServer() {
 
         console.log("MongoDB connected")
 
-        app.listen(process.env.PORT || 3000, () => {
-            console.log("Server started on port 3000")
+        const PORT = process.env.PORT || 3000
+
+        app.listen(PORT, "0.0.0.0", () => {
+            console.log(`Server started on port ${PORT}`)
         })
 
     } catch (error) {
-        console.log("MongoDB error:")
-        console.log(error.message)
+        console.error("MongoDB error:")
+        console.error(error.message)
+
+        process.exit(1)
     }
 }
 

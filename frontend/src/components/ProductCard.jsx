@@ -1,87 +1,118 @@
 import { Link } from "react-router-dom"
 import { useCart } from "../context/CartContext"
-import { useFavorites } from "../context/FavoritesContext"
 
-export default function ProductCard({ product }) {
-    const { addToCart } = useCart()
+export default function ProductCard({
+  product,
+  isFavorite = false,
+  onFavorite,
+}) {
+  const { addToCart } = useCart()
 
-    const {
-        toggleFavorite,
-        isFavorite,
-    } = useFavorites()
+  const productId = product._id || product.id
 
-    const favorite = isFavorite(product._id)
+  return (
+    <article className="group overflow-hidden rounded-[28px] bg-white shadow-[0_8px_30px_rgba(0,0,0,0.045)] transition duration-300 hover:-translate-y-1">
 
-    return (
-        <article className="group overflow-hidden rounded-[26px] bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
+      {/* IMAGE */}
 
-            {/* IMAGE */}
+      <div className="relative overflow-hidden">
 
-            <div className="relative">
-
-                <Link to={`/product/${product._id}`}>
-
-                    <img
-                        src={product.image}
-                        alt={product.name}
-                        className="h-48 w-full object-cover transition duration-500 group-hover:scale-105"
-                    />
-
-                </Link>
-
-
-                {/* LIKE */}
-
-                <button
-                    onClick={() => toggleFavorite(product)}
-                    className={`absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-xl shadow-md backdrop-blur-sm transition hover:scale-110 active:scale-90 ${
-                        favorite
-                            ? "text-[#e85d3f]"
-                            : "text-gray-400"
-                    }`}
-                >
-                    {favorite ? "♥" : "♡"}
-                </button>
-
-            </div>
+        <Link
+          to={`/product/${productId}`}
+          className="block"
+        >
+          <img
+            src={product.image}
+            alt={product.name}
+            className="h-48 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-52"
+          />
+        </Link>
 
 
-            {/* CONTENT */}
+        {/* FAVORITE */}
 
-            <div className="p-4">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
 
-                <Link to={`/product/${product._id}`}>
+            if (onFavorite) {
+              onFavorite(product)
+            }
+          }}
+          className={`
+            absolute
+            right-3
+            top-3
+            flex
+            h-10
+            w-10
+            items-center
+            justify-center
+            rounded-full
+            bg-white/95
+            text-[22px]
+            shadow-[0_4px_15px_rgba(0,0,0,0.12)]
+            backdrop-blur
+            transition
+            hover:scale-105
+            active:scale-90
+            ${
+              isFavorite
+                ? "text-[#ff3043]"
+                : "text-[#555555]"
+            }
+          `}
+        >
+          {isFavorite ? "♥" : "♡"}
+        </button>
 
-                    <h3 className="font-bold text-gray-900">
-                        {product.name}
-                    </h3>
-
-                </Link>
+      </div>
 
 
-                <p className="mt-1 line-clamp-2 text-xs leading-5 text-gray-400">
-                    {product.description}
-                </p>
+      {/* INFO */}
+
+      <div className="p-4">
+
+        <Link to={`/product/${productId}`}>
+
+          <h3 className="line-clamp-1 text-[15px] font-black">
+            {product.name}
+          </h3>
+
+          <p className="mt-1 line-clamp-2 text-xs leading-5 text-gray-400">
+            {product.description}
+          </p>
+
+        </Link>
 
 
-                <div className="mt-4 flex items-center justify-between">
+        {/* PRICE + CART */}
 
-                    <span className="font-black">
-                        {product.price.toLocaleString()} сум
-                    </span>
+        <div className="mt-4 flex items-center justify-between">
+
+          <span className="text-[16px] font-black">
+            {product.price?.toLocaleString("ru-RU")}
+
+            <span className="ml-1 text-xs font-semibold text-gray-400">
+              сум
+            </span>
+          </span>
 
 
-                    <button
-                        onClick={() => addToCart(product)}
-                        className="flex h-10 w-10 items-center justify-center rounded-full bg-[#e85d3f] text-xl font-medium text-white transition hover:scale-105 hover:bg-[#d94f34] active:scale-95"
-                    >
-                        +
-                    </button>
+          <button
+            type="button"
+            onClick={() => addToCart(product)}
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ff4d35] text-xl font-medium text-white shadow-lg shadow-[#ff4d35]/20 transition active:scale-90"
+          >
+            +
+          </button>
 
-                </div>
+        </div>
 
-            </div>
+      </div>
 
-        </article>
-    )
+    </article>
+  )
 }
