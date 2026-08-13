@@ -22,7 +22,6 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
-  // Считаем общую стоимость прямо из корзины
   const totalPrice = cart.reduce(
     (total, item) => {
       return total + item.price * item.quantity
@@ -30,7 +29,6 @@ export default function Checkout() {
     0
   )
 
-  // Общее количество товаров
   const totalItems = cart.reduce(
     (total, item) => {
       return total + item.quantity
@@ -74,21 +72,60 @@ export default function Checkout() {
         totalPrice,
       })
 
+      /*
+        Сохраняем заказ в localStorage,
+        чтобы страница "Мои заказы"
+        могла его показать.
+      */
+
+      const savedOrders =
+        JSON.parse(
+          localStorage.getItem("orders")
+        ) || []
+
+      const newOrder = {
+        id: order._id,
+        date: new Date().toLocaleString("ru-RU"),
+        status: "Принят",
+        itemsCount: totalItems,
+        total: totalPrice,
+      }
+
+      localStorage.setItem(
+        "orders",
+        JSON.stringify([
+          newOrder,
+          ...savedOrders,
+        ])
+      )
+
+      /*
+        После успешного заказа
+        очищаем корзину.
+      */
+
       clearCart()
 
-      navigate(`/order-success?id=${order._id}`)
+      /*
+        Переходим на страницу успешного заказа.
+      */
+
+      navigate(
+        `/order-success?id=${order._id}`
+      )
+
     } catch (error) {
       console.error(error)
 
       setError(
-        error?.message || "Не удалось оформить заказ"
+        error?.message ||
+          "Не удалось оформить заказ"
       )
+
     } finally {
       setLoading(false)
     }
   }
-
-  // EMPTY CART
 
   if (cart.length === 0) {
     return (
@@ -310,8 +347,6 @@ export default function Checkout() {
 
         </form>
 
-
-        {/* BOTTOM SPACE FOR NAVBAR */}
 
         <div className="h-24" />
 
