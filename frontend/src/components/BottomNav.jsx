@@ -1,29 +1,42 @@
 import { Link, useLocation } from "react-router-dom"
 import { useCart } from "../context/CartContext"
 
+import {
+  IoHomeOutline,
+  IoHeartOutline,
+  IoCartOutline,
+  IoPersonOutline,
+} from "react-icons/io5"
+
 export default function BottomNav() {
   const location = useLocation()
-  const { cartCount } = useCart()
+
+  const { cart } = useCart()
+
+  const cartCount = cart.reduce(
+    (total, item) => total + item.quantity,
+    0
+  )
 
   const items = [
     {
       path: "/",
-      icon: "⌂",
+      icon: IoHomeOutline,
       label: "Главная",
     },
     {
       path: "/favorites",
-      icon: "♡",
+      icon: IoHeartOutline,
       label: "Лайки",
     },
     {
       path: "/cart",
-      icon: "🛒",
+      icon: IoCartOutline,
       label: "Корзина",
     },
     {
       path: "/profile",
-      icon: "♙",
+      icon: IoPersonOutline,
       label: "Профиль",
     },
   ]
@@ -50,10 +63,12 @@ export default function BottomNav() {
       "
     >
 
-      {items.map((item, index) => {
+      {items.map((item) => {
 
         const active =
           location.pathname === item.path
+
+        const Icon = item.icon
 
         return (
           <Link
@@ -93,14 +108,16 @@ export default function BottomNav() {
                     ? "scale-110"
                     : "scale-100"
                 }
-                ${
-                  item.path === "/cart"
-                    ? "text-[18px]"
-                    : "text-[24px]"
-                }
               `}
             >
-              {item.icon}
+              <Icon
+                size={
+                  item.path === "/cart"
+                    ? 20
+                    : 24
+                }
+                strokeWidth={1.8}
+              />
             </span>
 
 
